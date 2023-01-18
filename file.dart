@@ -227,3 +227,119 @@ int f(int n, Fly fly)
 
   return (cnt * fly.flyTime + tempMin) * fly.speed;
 }
+
+import 'dart:ffi';
+import 'dart:io';
+import 'dart:math';
+
+const GRID_SIZE = 100;
+const STEPS = 100;
+
+void main()
+{
+  File("D:\\advent.txt").readAsString().then((result)
+  {
+    var arr = List.generate(GRID_SIZE, (i) => 
+      List.filled(GRID_SIZE, true));
+
+    var counters = List.generate(GRID_SIZE, (i) => 
+      List.filled(GRID_SIZE, 0));
+
+    var strings = result.split('\r\n');
+
+    for(int i=0;i<strings.length;i++)
+    {
+      String input = strings[i];
+
+      for(int j=0;j<input.length;j++)
+      {
+        if((i == 0 && j == 0) || (i == 0 && j == GRID_SIZE - 1) ||
+            (i == GRID_SIZE - 1 && j == 0) || (i == GRID_SIZE - 1 && j == GRID_SIZE - 1))
+            continue;
+
+        if(input[j] == '#')
+        {
+          arr[i][j] = true;
+        }
+        else
+        {
+          arr[i][j] = false;
+        }
+      }
+    }
+
+    for(int a=0;a<STEPS;a++)
+    {
+      int i = 3;
+      for(int i=0;i<GRID_SIZE;i++)
+      {
+        for(int j=0;j<GRID_SIZE;j++)
+        {
+          counters[i][j] = countNeighbors(i, j, arr);
+        }
+      }
+
+      for(int i=0;i<GRID_SIZE;i++)
+      {
+        for(int j=0;j<GRID_SIZE;j++)
+        {
+          if((i == 0 && j == 0) || (i == 0 && j == GRID_SIZE - 1) ||
+            (i == GRID_SIZE - 1 && j == 0) || (i == GRID_SIZE - 1 && j == GRID_SIZE - 1))
+            continue;
+          
+          int cnt = counters[i][j];
+
+          if(arr[i][j] && cnt != 2 && cnt != 3)
+          {
+            arr[i][j] = false;
+          }
+          else if(!arr[i][j] && cnt == 3)
+          {
+            arr[i][j] = true;
+          }
+        }
+      }
+    }
+
+    int ans = 0;
+
+    for(int i=0;i<GRID_SIZE;i++)
+    {
+      for(int j=0;j<GRID_SIZE;j++)
+      {
+        if(arr[i][j])
+          ans++;
+      }
+    }
+
+    print(ans);
+  });
+}
+
+int countNeighbors(int x, int y, List<List<bool>> arr)
+{
+  int cnt = 0;
+
+  for(int a=x-1;a<=x+1;a++)
+  {
+    for(int b=y-1;b<=y+1;b++)
+    {
+      if(getState(a, b, arr) && (a != x || b != y))
+      {
+        cnt++;
+      }
+    }
+  }
+
+  return cnt;
+}
+
+bool getState(int x, int y, List<List<bool>> arr)
+{
+  if(x < 0 || x == GRID_SIZE)
+    return false;
+  else if(y < 0 || y == GRID_SIZE)
+    return false;
+  else
+    return arr[x][y];
+}
